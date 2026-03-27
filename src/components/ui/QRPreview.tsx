@@ -82,7 +82,6 @@ export const QRPreview = ({ value }: { value: string }) => {
       </Button>
       <a href={value} target="_blank">
         <Button
-          onClick={handleDownload}
           variant={"outline"}
           className="   shadow"
         >
