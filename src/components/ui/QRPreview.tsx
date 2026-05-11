@@ -6,6 +6,7 @@ export const QRPreview = ({ value }: { value: string }) => {
   const frameRef = useRef<HTMLDivElement>(null);
   const [color, setColor] = useState("#ec4899"); // pink
   const [message, setMessage] = useState("Quét ở đây nè");
+  const [isCopied, setIsCopied] = useState(false);
   const getGradient = (hex: string) =>
     `linear-gradient(135deg, ${hex}33 0%, ${hex}05 100%)`;
   const handleDownload = async () => {
@@ -24,7 +25,11 @@ export const QRPreview = ({ value }: { value: string }) => {
       frameRef.current.style.padding = originalStyle;
     }
   };
-
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
   return (
     <div className="text-center space-y-4 flex-col flex items-center ">
       <div className="flex flex-col justify-center items-center">
@@ -80,14 +85,22 @@ export const QRPreview = ({ value }: { value: string }) => {
       >
         Tải xuống QR nè
       </Button>
-      <a href={value} target="_blank">
+      <div className="flex gap-3">
+        <a href={value} target="_blank">
+          <Button
+            variant={"outline"}
+            className="shadow"
+          >
+            Xem trước
+          </Button>
+        </a>
         <Button
           variant={"outline"}
-          className="   shadow"
+          onClick={handleCopy}
         >
-          Xem trước đây nè
+          {isCopied ? "Đã sao chép" : "Copy link"}
         </Button>
-      </a>
+      </div>
     </div>
   );
 };

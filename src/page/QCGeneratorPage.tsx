@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { QRPreview } from "@/components/ui/QRPreview";
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
-
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import { encode } from "@msgpack/msgpack";
+import { X } from "lucide-react";
 export const QCGeneratorPage = () => {
   const [title, setTitle] = useState<string>("");
-  const [messages, setMessages] = useState<string>(
-    "Anh nhớ em\nEm là cả thế giới của anh",
-  );
+  const [messages, setMessages] = useState<string[]>([
+    "Anh nhớ em",
+    "Em là cả thế giới của anh",
+  ]);
+  const [currentMessage, setCurrentMessage] = useState("");
   const [music, setMusic] = useState<string>("music/phepmau.mp3");
   const [generatedUrl, setGeneratedUrl] = useState<string>("");
   const audioOptions = [
@@ -22,12 +25,40 @@ export const QCGeneratorPage = () => {
     { label: "Phút ban đầu", value: "music/phutbandau.mp3" },
   ];
   const handleGenerate = () => {
-    const params = new URLSearchParams();
-    if (title) params.append("title", title);
-    if (messages) params.append("messages", messages.split("\n").join("|"));
-    if (music) params.append("music", music);
-    const url = `${window.location.origin}/love?${params.toString()}`;
+    const dataArray = [
+      title || "",
+      messages.join("|"),
+      music || ""
+    ];
+    const uint8 = encode(dataArray);
+    const base64 = btoa(String.fromCharCode(...uint8))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    const url = `${window.location.origin}/love?d=${base64}`;
     setGeneratedUrl(url);
+  };
+
+  const addMessage = () => {
+    if (currentMessage.trim()) {
+      setMessages([...messages, currentMessage.trim()]);
+      setCurrentMessage("");
+    }
+  };
+
+  const removeMessage = (index: number) => {
+    setMessages(messages.filter((_, i) => i !== index));
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e .key === "Backspace") {
+      e.preventDefault();
+      removeMessage(messages.length - 1);
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addMessage();
+    }
   };
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -71,16 +102,32 @@ export const QCGeneratorPage = () => {
 
         <div className="space-y-2">
           <label className="text-gray-700 font-medium">📝 Lời nhắn</label>
-          <p className=" text-pink-500">Mỗi dòng là một lời nhắn</p>
-          <textarea
-            value={messages}
-            maxLength={500}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-              setMessages(e.target.value)
-            }
-            placeholder="Nhập lời nhắn của bạn..."
-            className="w-full h-42 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 transition"
-          />
+          <p className=" text-pink-500">Nhấn Enter để thêm lời nhắn</p>
+          
+          <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[140px] focus-within:ring-2 focus-within:ring-pink-300 transition bg-white">
+            {messages.map((msg, index) => (
+              <div 
+                key={index} 
+                className="flex items-center gap-1 bg-pink-100 text-pink-700 px-3 py-1 h-[30px] rounded-full text-sm font-medium animate-in fade-in zoom-in duration-200"
+              >
+                <span>{msg}</span>
+                <button 
+                  onClick={() => removeMessage(index)}
+                  className="hover:bg-pink-200 rounded-full p-0.5 transition-colors cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+            <input
+              type="text"
+              value={currentMessage}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setCurrentMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={messages.length === 0 ? "Nhập lời nhắn của bạn..." : ""}
+              className="flex-1 outline-none min-w-[150px] p-1 text-gray-700"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -111,7 +158,7 @@ export const QCGeneratorPage = () => {
 
         <div className="text-center">
           <Button
-            disabled={!title || !messages}
+            disabled={!title || messages.length === 0}
             onClick={handleGenerate}
             className="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-6 py-3 rounded-lg transition"
           >
