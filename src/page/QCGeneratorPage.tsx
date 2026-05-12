@@ -104,7 +104,7 @@ export const QCGeneratorPage = () => {
           <label className="text-gray-700 font-medium">📝 Lời nhắn</label>
           <p className=" text-pink-500">Nhấn Enter để thêm lời nhắn</p>
           
-          <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-lg min-h-[140px] focus-within:ring-2 focus-within:ring-pink-300 transition bg-white">
+          <div className="flex flex-wrap items-center content-start gap-2 p-2 border border-gray-300 rounded-lg min-h-[140px] focus-within:ring-2 focus-within:ring-pink-300 transition bg-white">
             {messages.map((msg, index) => (
               <div 
                 key={index} 
@@ -125,7 +125,7 @@ export const QCGeneratorPage = () => {
               onChange={(e: ChangeEvent<HTMLInputElement>) => setCurrentMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={messages.length === 0 ? "Nhập lời nhắn của bạn..." : ""}
-              className="flex-1 outline-none min-w-[150px] p-1 text-gray-700"
+              className="flex-1 outline-none text-gray-700 h-[30px] text-sm"
             />
           </div>
         </div>
