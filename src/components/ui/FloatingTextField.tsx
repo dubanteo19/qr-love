@@ -23,7 +23,7 @@ export const FloatingTextField: FC<{ phrases: string[] }> = ({ phrases }) => {
 
         const baseSize = isMobile ? 0.05 : 0.1;
         const size = baseSize + Math.random() * 0.1;
-        const speed = 0.3 + Math.random() * 0.7;
+        const speed = 0.3 + Math.random() * 0.65;
 
         return (
           <FloatingText
