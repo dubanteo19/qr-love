@@ -12,6 +12,7 @@ export const QCGeneratorPage = () => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [music, setMusic] = useState<string>("music/phepmau.mp3");
   const [generatedUrl, setGeneratedUrl] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const audioOptions = [
     { label: "Phép Màu", value: "music/phepmau.mp3" },
     { label: "Ánh Nắng Của Anh", value: "music/anhnangcuaanh.mp3" },
@@ -51,15 +52,15 @@ export const QCGeneratorPage = () => {
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e .key === "Backspace") {
+    if (e.key === "Backspace" && currentMessage === "") {
       e.preventDefault();
       removeMessage(messages.length - 1);
     }
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addMessage();
-    }
   };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addMessage();
+  }
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   useEffect(() => {
@@ -103,31 +104,50 @@ export const QCGeneratorPage = () => {
         <div className="space-y-2">
           <label className="text-gray-700 font-medium">📝 Lời nhắn</label>
           <p className=" text-pink-500">Nhấn Enter để thêm lời nhắn</p>
-          
-          <div className="flex flex-wrap items-center content-start gap-2 p-2 border border-gray-300 rounded-lg min-h-[140px] focus-within:ring-2 focus-within:ring-pink-300 transition bg-white">
+
+          <form
+            onSubmit={handleSubmit}
+            onClick={(e) => {
+              if ((e.target as HTMLElement).tagName !== "BUTTON") {
+                inputRef.current?.focus();
+              }
+            }}
+            className="flex flex-wrap items-center content-start gap-2 p-2 border border-gray-300 rounded-lg min-h-[140px] focus-within:ring-2 focus-within:ring-pink-300 transition bg-white cursor-text"
+          >
             {messages.map((msg, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="flex items-center gap-1 bg-pink-100 text-pink-700 px-3 py-1 h-[30px] rounded-full text-sm font-medium animate-in fade-in zoom-in duration-200"
               >
                 <span>{msg}</span>
-                <button 
-                  onClick={() => removeMessage(index)}
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeMessage(index);
+                  }}
                   className="hover:bg-pink-200 rounded-full p-0.5 transition-colors cursor-pointer"
                 >
                   <X size={14} />
                 </button>
               </div>
             ))}
+
             <input
+              ref={inputRef}
               type="text"
               value={currentMessage}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setCurrentMessage(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setCurrentMessage(e.target.value)
+              }
               onKeyDown={handleKeyDown}
-              placeholder={messages.length === 0 ? "Nhập lời nhắn của bạn..." : ""}
-              className="flex-1 outline-none text-gray-700 h-[30px] text-sm"
+              placeholder={
+                messages.length === 0 ? "Nhập lời nhắn của bạn..." : ""
+              }
+              className="flex-1 outline-none text-gray-700 h-[30px] text-sm bg-transparent"
             />
-          </div>
+          </form>
         </div>
 
         <div className="space-y-2">
